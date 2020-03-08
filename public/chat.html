@@ -1,0 +1,68 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+<style>
+  input{
+    width: 100%;
+    height: 35px;
+  }
+  #messages {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  #messages {
+    padding: 5px 10px;
+  }
+  #messages li:nth-child(odd) {
+    background: #eee;
+  }
+</style>
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12">
+      <form action="" id="message-form">
+        <div class="col-sm-10">
+          <input type="text" id="user-message" placeholder="Enter your message">
+        </div>
+        <div class="col-sm-2">
+          <input type="submit" class="btn btn-primary" value="Send!">
+        </div>
+      </form>
+      <ul id="messages">
+        <!-- THIS WILL BE POPULATED BY JS -->
+      </ul>
+    </div>
+  </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+  const socket = io("http://localhost:9000");
+  socket.on('connect', () => {
+    console.log(socket.id);
+  })
+  socket.on("messageFromServer", (dataFromServer) => {
+    console.log(dataFromServer);
+    socket.emit("messageToServer", {data: "Data from the Client"})
+  })
+
+  document.querySelector('#message-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const newMessage = document.querySelector('#user-message').value;
+    socket.emit('newMessageToServer', {text: newMessage})
+  })
+
+  socket.on('messageToClients', (msg) => {
+    console.log(msg);
+    document.querySelector('#messages').innerHTML += `<li>${msg.text}</li>`
+  })
+
+  // socket.on('ping', () => {
+  //   console.log('ping was recieved from the server')
+  // })
+  // socket.on('pong', (latency) => {
+  //   console.log(latency);
+  //   console.log('Pong was sent to the server')
+  // })
+</script>
